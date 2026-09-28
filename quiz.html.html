@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAW506: Mutual Assent Quiz</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --error: #c0392b;
+            --background: #fdfdfd;
+            --surface: #ffffff;
+            --text-main: #333333;
+            --text-muted: #7f8c8d;
+            --border: #ecf0f1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-size: 18px; /* Large readable text */
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header h2 {
+            font-size: 1.2rem;
+            font-weight: normal;
+            color: #ecf0f1;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem 1rem;
+        }
+
+        .quiz-container {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .progress {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            background-color: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            background-color: #f7f9fa;
+        }
+        
+        .option-btn:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .option-btn.correct {
+            background-color: #e8f8f5;
+            border-color: var(--success);
+            color: #1e8449;
+        }
+
+        .option-btn.wrong {
+            background-color: #fdedec;
+            border-color: var(--error);
+            color: #922b21;
+        }
+        
+        .option-btn:disabled {
+            cursor: default;
+            opacity: 0.8;
+        }
+
+        .key-hint {
+            display: inline-block;
+            background-color: #eee;
+            color: #555;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            margin-right: 12px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+
+        .feedback-area {
+            min-height: 80px; /* Prevent layout shift */
+            margin-bottom: 1.5rem;
+        }
+
+        .explanation {
+            display: none;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .explanation.correct-feedback {
+            background-color: #e8f8f5;
+            border-left: 4px solid var(--success);
+        }
+
+        .explanation.wrong-feedback {
+            background-color: #fdedec;
+            border-left: 4px solid var(--error);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .action-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .result-screen h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: var(--secondary);
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            body { font-size: 16px; }
+            .quiz-container { padding: 1.5rem 1rem; border-radius: 0; border-left: none; border-right: none;}
+            .option-btn { padding: 0.75rem 1rem; }
+            .key-hint { display: none; } /* Hide keyboard hints on smaller screens (likely mobile) */
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>LAW506</h1>
+        <h2>Mutual Assent in Contract Formation</h2>
+    </header>
+
+    <main>
+        <div class="quiz-container" id="quiz-area">
+            
+            <div id="question-screen">
+                <div class="progress" id="progress-text">Question 1 of 10</div>
+                <div class="question-text" id="question-text">Question goes here...</div>
+                
+                <div class="options-container" id="options-container">
+                    <!-- Options injected by JS -->
+                </div>
+
+                <div class="feedback-area">
+                    <div id="explanation-box" class="explanation"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="action-btn" id="next-btn" style="display: none;">Next <span class="key-hint" style="margin-left:8px; margin-right:0;">Enter</span></button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="result-screen">
+                <h3>Quiz Complete!</h3>
+                <p>Your score is:</p>
+                <div class="score-display" id="final-score">0/10</div>
+                <button class="action-btn" id="restart-btn">Try Again</button>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        Made by Prof. Chen with Gemini
+    </footer>
+
+    <script>
+        // EDIT QUESTIONS HERE
+        // Array of 10 questions. exactly one correct option.
+        const originalQuestions = [
+            {
+                question: "What is the general standard used by courts to determine if mutual assent exists?",
+                options: [
+                    "The subjective intent of the parties",
+                    "The objective manifestation of intent",
+                    "The relative bargaining power of the parties",
+                    "The financial detriment suffered by the offeree"
+                ],
+                correctIndex: 1,
+                explanation: "Courts look at the outward, objective manifestations of intent (words and conduct), not secret, subjective intentions."
+            },
+            {
+                question: "Which of the following generally does NOT constitute a valid offer?",
+                options: [
+                    "An advertisement in a newspaper",
+                    "A reward poster for a lost dog",
+                    "A signed purchase order with specific terms",
+                    "A verbal promise to sell a specific car for a specific price"
+                ],
+                correctIndex: 0,
+                explanation: "Advertisements are generally considered invitations to negotiate or make an offer, unless they are clear, definite, explicit, and leave nothing open for negotiation."
+            },
+            {
+                question: "Under the common law 'mirror image rule,' an acceptance must:",
+                options: [
+                    "Be communicated using the exact same medium as the offer",
+                    "Be made within a reasonable time, mirroring the offer's duration",
+                    "Exactly match the terms of the offer without modifications",
+                    "Be signed by both parties to reflect identical intent"
+                ],
+                correctIndex: 2,
+                explanation: "The mirror image rule requires the acceptance to perfectly match the offer; any proposed changes constitute a rejection and counteroffer."
+            },
+            {
+                question: "At what point is a revocation of an offer generally effective?",
+                options: [
+                    "When it is dispatched by the offeror",
+                    "When it is received by the offeree",
+                    "When the offeree decides to reject the offer",
+                    "When a reasonable time has passed"
+                ],
+                correctIndex: 1,
+                explanation: "Unlike acceptances under the mailbox rule, revocations are generally only effective upon actual receipt by the offeree."
+            },
+            {
+                question: "The 'Mailbox Rule' applies primarily to:",
+                options: [
+                    "Revocations of offers",
+                    "Rejections of offers",
+                    "Acceptances of offers",
+                    "Counteroffers"
+                ],
+                correctIndex: 2,
+                explanation: "The mailbox rule states that an acceptance is generally effective upon dispatch (e.g., when mailed), provided it is properly addressed and stamped."
+            },
+            {
+                question: "If an offeree responds to an offer with an inquiry regarding terms (e.g., 'Would you take less?'), this is generally considered:",
+                options: [
+                    "An acceptance",
+                    "A rejection and counteroffer",
+                    "A mere inquiry that leaves the original offer open",
+                    "A binding option contract"
+                ],
+                correctIndex: 2,
+                explanation: "A mere inquiry or request for better terms does not terminate the original offer, unlike a definitive counteroffer."
+            },
+            {
+                question: "Which of the following terminates an offer by operation of law?",
+                options: [
+                    "The offeree asking for more time to consider",
+                    "The offeror finding a better buyer",
+                    "The death or mental incapacity of the offeror prior to acceptance",
+                    "The offeree failing to read the terms carefully"
+                ],
+                correctIndex: 2,
+                explanation: "An offer automatically terminates upon the death or mental incapacity of either the offeror or the offeree before acceptance."
+            },
+            {
+                question: "In an auction 'without reserve,' the auctioneer:",
+                options: [
+                    "Must sell to the highest bidder once a bid is made",
+                    "Can withdraw the item at any time before the hammer falls",
+                    "Is making an invitation to negotiate",
+                    "Cannot accept bids below a secret minimum price"
+                ],
+                correctIndex: 0,
+                explanation: "In an auction without reserve, putting the item up constitutes an offer, and the auctioneer cannot withdraw it once a bid is made; they must sell to the highest bidder."
+            },
+            {
+                question: "A 'firm offer' under the Uniform Commercial Code (UCC) allows an offer to remain open without consideration if:",
+                options: [
+                    "It is made verbally by any party",
+                    "It is made by a merchant in a signed writing",
+                    "It involves real estate",
+                    "The offeree pays a nominal fee"
+                ],
+                correctIndex: 1,
+                explanation: "UCC § 2-205 allows a merchant to make a binding firm offer to buy or sell goods in a signed writing without needing separate consideration."
+            },
+            {
+                question: "When a party accepts an offer by performing the requested act rather than by making a return promise, this forms a:",
+                options: [
+                    "Bilateral contract",
+                    "Unilateral contract",
+                    "Quasi-contract",
+                    "Voidable contract"
+                ],
+                correctIndex: 1,
+                explanation: "A unilateral contract is formed when an offer requests acceptance by performance (an act), rather than by a promise to perform."
+            }
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        const elements = {
+            questionScreen: document.getElementById('question-screen'),
+            resultScreen: document.getElementById('result-screen'),
+            progressText: document.getElementById('progress-text'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationBox: document.getElementById('explanation-box'),
+            nextBtn: document.getElementById('next-btn'),
+            finalScore: document.getElementById('final-score'),
+            restartBtn: document.getElementById('restart-btn')
+        };
+
+        // Utility to shuffle an array
+        function shuffleArray(array) {
+            const newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        function initQuiz() {
+            currentQuestions = shuffleArray(originalQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            elements.questionScreen.style.display = 'block';
+            elements.resultScreen.style.display = 'none';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            const q = currentQuestions[currentQuestionIndex];
+            
+            // Update UI
+            elements.progressText.textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+            elements.questionText.textContent = q.question;
+            
+            // Reset feedback and button
+            elements.explanationBox.className = 'explanation';
+            elements.explanationBox.innerHTML = '';
+            elements.nextBtn.style.display = 'none';
+
+            // Generate options
+            elements.optionsContainer.innerHTML = '';
+            q.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                // Add keyboard hint spans (1-4)
+                btn.innerHTML = `<span class="key-hint">${index + 1}</span> <span>${optText}</span>`;
+                btn.onclick = () => handleAnswer(index);
+                elements.optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedIndex) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const q = currentQuestions[currentQuestionIndex];
+            const isCorrect = selectedIndex === q.correctIndex;
+            
+            if (isCorrect) score++;
+
+            // Update option styling
+            const buttons = elements.optionsContainer.querySelectorAll('.option-btn');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true; // Disable all
+                if (idx === q.correctIndex) {
+                    btn.classList.add('correct');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            // Show Explanation
+            elements.explanationBox.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Incorrect.'}</strong> ${q.explanation}`;
+            elements.explanationBox.classList.add('show', isCorrect ? 'correct-feedback' : 'wrong-feedback');
+
+            // Show Next Button
+            elements.nextBtn.style.display = 'inline-block';
+            elements.nextBtn.focus();
+        }
+
+        function nextQuestion() {
+            if (!isAnswered) return;
+            
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            elements.questionScreen.style.display = 'none';
+            elements.resultScreen.style.display = 'block';
+            elements.finalScore.textContent = `${score}/${currentQuestions.length}`;
+        }
+
+        elements.nextBtn.addEventListener('click', nextQuestion);
+        elements.restartBtn.addEventListener('click', initQuiz);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            // Handle Next (Enter)
+            if (e.key === 'Enter') {
+                if (elements.resultScreen.style.display === 'block') {
+                     initQuiz(); // Restart if on end screen
+                } else if (isAnswered && elements.nextBtn.style.display !== 'none') {
+                    nextQuestion();
+                }
+                return;
+            }
+
+            // Handle Answer selection (1-4)
+            if (!isAnswered && elements.questionScreen.style.display !== 'none') {
+                const key = parseInt(e.key);
+                if (key >= 1 && key <= 4) {
+                    const q = currentQuestions[currentQuestionIndex];
+                    if (key <= q.options.length) {
+                        handleAnswer(key - 1);
+                    }
+                }
+            }
+        });
+
+        // Start the quiz
+        initQuiz();
+
+    </script>
+</body>
+</html>
